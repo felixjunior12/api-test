@@ -16,7 +16,7 @@ async def create_person(data):
 async def get_person(id):
     pool = get_db_pool()
     async with pool.acquire() as conn:
-        result = await conn.fetch("SELECT p.id, p.first_name, p.last_name, p.passport_number, p.birth_date, c.name as birth_country FROM person as p INNER JOIN country as c ON p.birth_country = c.id WHERE p.id = $1", id)
+        result = await conn.fetch("SELECT p.id, p.first_name, p.last_name, p.passport_number, p.birth_date, c.name as birth_country FROM person as p INNER JOIN country as c ON p.birth_country = c.id WHERE p.id = $1 AND p.status = 'active'", id)
         return PersonSchema(**result[0]) if result else None
 
 
@@ -32,11 +32,11 @@ async def update_person(id, data):
 async def delete_person(id):
     pool = get_db_pool()
     async with pool.acquire() as conn:
-        await conn.execute("DELETE FROM person WHERE id = $1", id)
+        await conn.execute("UPDATE person SET status = 'deleted' WHERE id = $1", id)
 
 
 async def get_persons():
     pool = get_db_pool()
     async with pool.acquire() as conn:
-        result = await conn.fetch("SELECT p.id, p.first_name, p.last_name, p.passport_number, p.birth_date, c.name as birth_country FROM person as p INNER JOIN country as c ON p.birth_country = c.id ")
+        result = await conn.fetch("SELECT p.id, p.first_name, p.last_name, p.passport_number, p.birth_date, c.name as birth_country FROM person as p INNER JOIN country as c ON p.birth_country = c.id WHERE p.status = 'active'")
         return [PersonSchema(**row) for row in result]

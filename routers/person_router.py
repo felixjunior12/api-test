@@ -38,5 +38,11 @@ async def update_person(id: int, person: PersonCreateSchema):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
+@router.delete("/{id}", response_model=PersonCreatedResponseSchema, status_code=status.HTTP_200_OK)
+async def delete_person(id: int):
+    try:
+        await person_service.delete_person(id)
+        return PersonCreatedResponseSchema(message="Person deleted")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
